@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SSMoon Linear Equation Solver</title>
+<style>
+body {
+    font-family: 'Comic Sans MS', cursive;
+    background: linear-gradient(135deg, #fef3c7, #fde68a);
+    color: #1f2937;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+.container {
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 20px;
+    width: 460px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    border: 3px dashed #000;
+}
+h1 { text-align: center; margin-bottom: 10px; }
+.snoopy { text-align: center; font-size: 40px; }
+textarea {
+    width: 100%; height: 100px; border-radius: 15px;
+    border: 2px solid #000; padding: 10px; margin-bottom: 10px;
+}
+button {
+    width: 100%; padding: 10px; border: none;
+    border-radius: 15px; background: #000; color: #fff;
+    cursor: pointer; margin-bottom: 10px;
+}
+.result {
+    padding: 10px; background: #f3f4f6;
+    border-radius: 15px; border: 2px solid #000;
+}
+canvas {
+    margin-top: 10px;
+    border: 2px solid #000;
+    border-radius: 10px;
+    display: none;
+}
+.footer { text-align: center; margin-top: 10px; font-size: 12px; }
+</style>
+</head>
+<body>
+<div class="container">
+    <div class="snoopy">🐶✨</div>
+    <h1>Snoopy Solver</h1>
+    <textarea id="input" placeholder="Use ONLY x and y for graph:\n2x + y = 5\nx - y = 1"></textarea>
+    <button onclick="solve()">Solve 🐾</button>
+    <div class="result" id="output">Snoopy is waiting... 💤</div>
+    <canvas id="graph" width="400" height="300"></canvas>
+    <div class="footer">© SSMoon</div>
+</div>
+
+<script>
+function parseEquation(eq) {
+    let [lhs, rhs] = eq.split('=');
+    if (!rhs) throw new Error("Invalid equation");
+
+    rhs = parseFloat(rhs.trim());
+    let terms = lhs.match(/[+-]?[^+-]+/g) || [];
+    let obj = {};
+
+    terms.forEach(term => {
+        let match = term.match(/([+-]?\d*)([a-z])/);
+        if (match) {
+            let coef = match[1];
+            let variable = match[2];
+            coef = coef === '' || coef === '+' ? 1 : coef === '-' ? -1 : parseFloat(coef);
+            obj[variable] = coef;
+        }
+    });
+
+    return { coeffs: obj, constant: rhs };
+}
+
+function solve() {
+    let inputLines = document.getElementById('input').value.trim().split('\n').filter(Boolean);
+    let equations = inputLines.map(parseEquation);
+
+    let variables = new Set();
+    equations.forEach(eq => Object.keys(eq.coeffs).forEach(v => variables.add(v)));
+    variables = Array.from(variables);
+
+    let matrix = equations.map(eq => variables.map(v => eq.coeffs[v] || 0));
+    let constants = equations.map(eq => eq.constant);
+
+    try {
+        let solution = gaussianElimination(matrix, constants);
+        let output = '';
+        variables.forEach((v, i) => {
+            output += v + ' = ' + solution[i].toFixed(3) + '<br>';
+        });
+        document.getElementById('output').innerHTML = '🎉 Solved!<br>' + output;
+    } catch (e) {
+        document.getElementById('output').innerHTML = '😵 Snoopy got confused...';
+    }
+
+    document.getElementById('graph').style.display = 'block';
+    drawGraph(equations);
+}
+
+function gaussianElimination(A, b) {
+    let n = A.length;
+
+    for (let i = 0; i < n; i++) {
+        let maxRow = i;
+        for (let k = i + 1; k < n; k++) {
+            if (Math.abs(A[k][i]) > Math.abs(A[maxRow][i])) maxRow = k;
+        }
+
+        [A[i], A[maxRow]] = [A[maxRow], A[i]];
+        [b[i], b[maxRow]] = [b[maxRow], b[i]];
+
+        for (let k = i + 1; k < n; k++) {
+            let factor = A[k][i] / A[i][i];
+            for (let j = i; j < n; j++) {
+                A[k][j] -= factor * A[i][j];
+            }
+            b[k] -= factor * b[i];
+        }
+    }
+
+    let x = Array(n).fill(0);
+    for (let i = n - 1; i >= 0; i--) {
+        x[i] = b[i];
+        for (let j = i + 1; j < n; j++) {
+            x[i] -= A[i][j] * x[j];
+        }
+        x[i] /= A[i][i];
+    }
+    return x;
+}
+
+function drawGraph(equations) {
+    const canvas = document.getElementById('graph');
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    const scale = 20;
+    const offsetX = canvas.width / 2;
+    const offsetY = canvas.height / 2;
+
+    // grid
+    ctx.strokeStyle = '#ddd';
+    ctx.lineWidth = 1;
+    for (let x = 0; x <= canvas.width; x += scale) {
+        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
+    }
+    for (let y = 0; y <= canvas.height; y += scale) {
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
+    }
+
+    // axes
+    ctx.strokeStyle = '#000';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(0, offsetY); ctx.lineTo(canvas.width, offsetY);
+    ctx.moveTo(offsetX, 0); ctx.lineTo(offsetX, canvas.height);
+    ctx.stroke();
+
+    // numbers
+    ctx.fillStyle = '#000';
+    ctx.font = '10px Arial';
+
+    for (let i = -10; i <= 10; i++) {
+        if (i === 0) continue;
+        ctx.fillText(i, offsetX + i * scale - 5, offsetY + 12);
+        ctx.fillText(i, offsetX + 5, offsetY - i * scale + 3);
+    }
+
+    // labels
+    ctx.fillText('X', canvas.width - 15, offsetY - 5);
+    ctx.fillText('Y', offsetX + 5, 10);
+
+    // lines
+    ctx.lineWidth = 2;
+    equations.forEach(eq => {
+        let a = eq.coeffs['x'] || 0;
+        let b = eq.coeffs['y'] || 0;
+        let c = eq.constant;
+
+        ctx.beginPath();
+
+        if (b === 0 && a !== 0) {
+            let xVal = c / a;
+            let x = offsetX + xVal * scale;
+            ctx.moveTo(x, 0);
+            ctx.lineTo(x, canvas.height);
+        } else if (b !== 0) {
+            for (let px = -10; px <= 10; px += 0.1) {
+                let py = (c - a * px) / b;
+                let x = offsetX + px * scale;
+                let y = offsetY - py * scale;
+                if (px === -10) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            }
+        }
+
+        ctx.stroke();
+    });
+}
+</script>
+</body>
+</html>
