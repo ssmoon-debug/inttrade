@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mitho Pizza Optimizer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Caveat:wght@600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:        #fffdf9;
+  --bg2:       #f7f3ed;
+  --text:      #1a1208;
+  --text2:     #5c4a2a;
+  --text3:     #9c8060;
+  --border:    #e2d5be;
+  --red:       #E8593C;
+  --red-lt:    #FFF0EB;
+  --blue:      #185FA5;
+  --blue-lt:   #E6F1FB;
+  --green:     #0F6E56;
+  --green-lt:  #E1F5EE;
+  --amber:     #854F0B;
+  --amber-lt:  #FAEEDA;
+  --crimson:   #A32D2D;
+  --crimson-lt:#FCEBEB;
+}
+
+body {
+  font-family: 'Nunito', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+/* HERO */
+.hero {
+  background: var(--red);
+  color: #fff;
+  text-align: center;
+  padding: 2.2rem 1rem 1.6rem;
+  position: relative;
+  overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(-45deg, transparent, transparent 18px, rgba(255,255,255,.06) 18px, rgba(255,255,255,.06) 36px);
+}
+.hero-inner { position: relative; z-index: 1; }
+.hero-emoji { font-size: 50px; display: block; margin-bottom: 6px; }
+.hero h1 { font-family: 'Caveat', cursive; font-size: 42px; font-weight: 700; line-height: 1.1; }
+.hero p  { font-size: 16px; opacity: .88; margin-top: 6px; font-weight: 600; }
+
+/* TABS */
+.tabs-bar {
+  display: flex;
+  background: var(--bg2);
+  border-bottom: 1.5px solid var(--border);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.tabs-bar::-webkit-scrollbar { display: none; }
+.tab-btn {
+  font-family: 'Nunito', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  padding: 13px 22px;
+  border: none;
+  background: transparent;
+  color: var(--text2);
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  white-space: nowrap;
+  transition: all .18s;
+  position: relative;
+  bottom: -1.5px;
+}
+.tab-btn:hover { color: var(--red); background: var(--red-lt); }
+.tab-btn.active { color: var(--red); border-bottom-color: var(--red); background: var(--bg); }
+
+/* SECTIONS */
+.section { display: none; padding: 1.6rem 1.4rem 2.4rem; max-width: 960px; margin: 0 auto; }
+.section.active { display: block; }
+
+h2 { font-size: 22px; font-weight: 800; margin-bottom: .5rem; color: var(--text); }
+.section-intro { font-size: 15px; color: var(--text2); line-height: 1.6; margin-bottom: 1.2rem; font-weight: 600; }
+
+/* CARDS */
+.card { background: #fff; border: 1px solid var(--border); border-radius: 14px; padding: 1.1rem 1.3rem; margin-bottom: 1rem; }
+.card-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .9px; color: var(--text3); margin-bottom: 6px; }
+.big-num { font-family: 'Caveat', cursive; font-size: 34px; font-weight: 700; color: var(--red); }
+.big-sub { font-size: 13px; color: var(--text2); margin-top: 2px; font-weight: 600; }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 1rem; }
+
+/* FORMULA */
+.fbox {
+  background: var(--bg2); border: 1px solid var(--border); border-radius: 12px;
+  padding: 14px 18px; font-family: 'Courier New', monospace; font-size: 13px;
+  line-height: 2.1; margin-bottom: 1.2rem; overflow-x: auto;
+}
+.fobj { color: var(--red); font-weight: 700; }
+.fcon { color: var(--blue); }
+.fvar { color: var(--green); }
+
+/* TABLE */
+.tbl-wrap { overflow-x: auto; margin-bottom: 1.2rem; }
+table { width: 100%; border-collapse: collapse; font-size: 15px; font-weight: 600; }
+th { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .6px; color: var(--text3); text-align: left; padding: 8px 12px; border-bottom: 1.5px solid var(--border); }
+td { padding: 7px 12px; border-bottom: .5px solid var(--border); }
+tr.chosen { background: #FFF7F4; }
+tr:last-child td { border-bottom: none; }
+.yes { color: var(--green); font-weight: 700; }
+.no  { color: var(--text3); }
+.badge { display: inline-block; padding: 2px 9px; border-radius: 10px; font-size: 12px; background: var(--red-lt); color: var(--red); font-weight: 700; }
+.badge.top { background: #FFF3CD; color: #7A5000; }
+
+/* STEP DESC */
+.sdesc {
+  background: var(--red-lt);
+  border-left: 4px solid var(--red);
+  border-radius: 0 10px 10px 0;
+  padding: 12px 16px;
+  margin-bottom: 1rem;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.6;
+  min-height: 70px;
+}
+.sdesc strong { color: var(--red); }
+
+/* STATS */
+.stats { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 1rem; }
+.pill { font-size: 12px; font-weight: 700; padding: 5px 14px; border-radius: 14px; border: 1.5px solid; }
+.pill.bd { background: var(--blue-lt);   color: var(--blue);   border-color: var(--blue); }
+.pill.bi { background: var(--green-lt);  color: var(--green);  border-color: var(--green); }
+.pill.gp { background: var(--amber-lt);  color: var(--amber);  border-color: var(--amber); }
+
+/* CONTROLS */
+.ctrl-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: .8rem; }
+.btn {
+  font-family: 'Nunito', sans-serif; font-size: 15px; font-weight: 700;
+  padding: 9px 22px; border-radius: 22px;
+  border: 2px solid var(--red); background: var(--red); color: #fff;
+  cursor: pointer; transition: all .17s;
+}
+.btn:disabled { background: var(--bg2); border-color: var(--border); color: var(--text3); cursor: not-allowed; }
+.btn.sec { background: #fff; color: var(--red); }
+.btn.sec:hover:not(:disabled) { background: var(--red-lt); }
+.step-lbl { font-size: 14px; font-weight: 700; color: var(--text2); min-width: 80px; text-align: center; }
+
+/* SLIDER WRAPPER */
+.slider-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 12px 18px;
+  margin-bottom: 1rem;
+}
+.slider-wrap label { font-size: 13px; font-weight: 700; color: var(--text2); white-space: nowrap; }
+
+/* Custom range slider */
+input[type=range] {
+  -webkit-appearance: none;
+  appearance: none;
+  flex: 1;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--border);
+  outline: none;
+  cursor: pointer;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--red);
+  border: 3px solid #fff;
+  box-shadow: 0 1px 4px rgba(0,0,0,.25);
+  cursor: pointer;
+  transition: transform .15s;
+}
+input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.15); }
+input[type=range]::-moz-range-thumb {
+  width: 22px; height: 22px; border-radius: 50%;
+  background: var(--red); border: 3px solid #fff;
+  box-shadow: 0 1px 4px rgba(0,0,0,.25); cursor: pointer;
+}
+.slider-val {
+  font-family: 'Caveat', cursive;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--red);
+  min-width: 36px;
+  text-align: center;
+}
+
+/* LEGEND */
+.legend { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: .8rem; font-size: 12px; font-weight: 600; align-items: center; color: var(--text2); }
+.ldot { width: 11px; height: 11px; border-radius: 50%; flex-shrink: 0; display: inline-block; margin-right: 3px; vertical-align: middle; }
+
+/* TREE */
+.tree-wrap { overflow-x: auto; background: #fff; border: 1px solid var(--border); border-radius: 14px; padding: 1rem; }
+
+/* BB CARDS */
+.bbcard { background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 12px 16px; margin-bottom: 10px; }
+.bbcard.hl   { border-color: var(--red);     background: var(--red-lt); }
+.bbcard.fat  { border-color: var(--crimson);  background: var(--crimson-lt); }
+.bbcard.opt  { border-color: var(--green);    background: var(--green-lt); }
+.bbcard-title { font-size: 16px; font-weight: 800; margin-bottom: 5px; }
+.bbcard-body  { font-size: 13px; font-weight: 600; color: var(--text2); line-height: 1.6; }
+.bbcard-body code { background: rgba(0,0,0,.08); padding: 1px 6px; border-radius: 4px; font-size: 12px; }
+
+footer { text-align: center; padding: 2rem 1rem; font-size: 12px; font-weight: 600; color: var(--text3); border-top: 1px solid var(--border); }
+
+@media (max-width: 520px) {
+  .hero h1 { font-size: 30px; }
+  .two-col  { grid-template-columns: 1fr; }
+  .tab-btn  { padding: 11px 14px; font-size: 13px; }
+}
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-inner">
+    <span class="hero-emoji">🐾🍕🐾</span>
+    <h1>Mitho Pizza Optimizer</h1>
+    <p>Branch &amp; Bound · Budget 7 ww · Maximize Satisfaction</p>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tabs-bar">
+  <button class="tab-btn active" onclick="switchTab('setup',this)">🍕 Problem Setup</button>
+  <button class="tab-btn" onclick="switchTab('tree',this)">🌳 Decision Tree</button>
+  <button class="tab-btn" onclick="switchTab('bb',this)">🔢 B&amp;B Continuous</button>
+</div>
+
+<!-- ══ TAB 1: SETUP ══ -->
+<div class="section active" id="tab-setup">
+  <h2>📋 Problem Setup</h2>
+  <p class="section-intro">Choose pizza toppings that maximize total satisfaction without exceeding <strong>7 ww</strong>. Each topping is either chosen (xᵢ = 1) or not (xᵢ = 0) — a classic 0/1 knapsack solved with Branch &amp; Bound.</p>
+
+  <div class="two-col">
+    <div class="card">
+      <div class="card-label">Budget</div>
+      <div class="big-num">7 ww</div>
+      <div class="big-sub">Actual spend: <strong style="color:var(--green)">6.5 ww ✓</strong></div>
+    </div>
+    <div class="card">
+      <div class="card-label">Optimal Satisfaction</div>
+      <div class="big-num">Z* = 26</div>
+      <div class="big-sub">5 toppings chosen</div>
+    </div>
+  </div>
+
+  <div class="fbox">
+    <div class="fobj">Maximize Z = 8.3x₁ + 5.2x₂ + 4.8x₃ + 4.2x₄ + 3.5x₅ + 4.7x₆ + 7.2x₇ + 4.2x₈ + 3.1x₉ + 5.0x₁₀</div>
+    <div class="fcon">Subject to: 2x₁ + 2x₂ + 0.5x₃ + x₄ + x₅ + 3x₆ + 3x₇ + 2x₈ + 1.5x₉ + 2x₁₀ ≤ 7</div>
+    <div class="fvar">xᵢ ∈ {0, 1} for each topping i = 1 … 10</div>
+  </div>
+
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Var</th><th>Topping</th><th>Cost (ww)</th><th>Satisfaction</th><th>Ratio</th><th>Optimal x*</th></tr></thead>
+      <tbody>
+        <tr class="chosen"><td>x₃</td><td>Nduja</td><td>0.5</td><td>4.8</td><td><span class="badge top">9.60 ★</span></td><td class="yes">x₃ = 1 ✓</td></tr>
+        <tr class="chosen"><td>x₄</td><td>Ricotta</td><td>1.0</td><td>4.2</td><td><span class="badge">4.20</span></td><td class="yes">x₄ = 1 ✓</td></tr>
+        <tr class="chosen"><td>x₁</td><td>Salame</td><td>2.0</td><td>8.3</td><td><span class="badge">4.15</span></td><td class="yes">x₁ = 1 ✓</td></tr>
+        <tr class="chosen"><td>x₅</td><td>Zucchini</td><td>1.0</td><td>3.5</td><td><span class="badge">3.50</span></td><td class="yes">x₅ = 1 ✓</td></tr>
+        <tr class="chosen"><td>x₂</td><td>Fried eggplant</td><td>2.0</td><td>5.2</td><td><span class="badge">2.60</span></td><td class="yes">x₂ = 1 ✓</td></tr>
+        <tr><td>x₇</td><td>Parma ham</td><td>3.0</td><td>7.2</td><td><span class="badge">2.40</span></td><td class="no">x₇ = 0</td></tr>
+        <tr><td>x₁₀</td><td>Buffalo mozzarella</td><td>2.0</td><td>5.0</td><td><span class="badge">2.50</span></td><td class="no">x₁₀ = 0</td></tr>
+        <tr><td>x₈</td><td>Pancetta</td><td>2.0</td><td>4.2</td><td><span class="badge">2.10</span></td><td class="no">x₈ = 0</td></tr>
+        <tr><td>x₉</td><td>Gorgonzola</td><td>1.5</td><td>3.1</td><td><span class="badge">2.07</span></td><td class="no">x₉ = 0</td></tr>
+        <tr><td>x₆</td><td>Burrata</td><td>3.0</td><td>4.7</td><td><span class="badge">1.57</span></td><td class="no">x₆ = 0</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p style="font-size:12px;color:var(--text3);font-weight:600">★ Sorted by sat/cost ratio — order used by LP relaxation greedy fill. Highlighted = optimal solution.</p>
+</div>
+
+<!-- ══ TAB 2: DECISION TREE ══ -->
+<div class="section" id="tab-tree">
+  <h2>🌳 B&amp;B Decision Tree</h2>
+  <p class="section-intro">Drag the slider or use Back/Next to step through all 6 steps. After the LP relaxation, <strong>x₈ (Pancetta)</strong> is fractional (0.25) — we branch on it first, then Node 2 branches on <strong>x₂ (Fried eggplant)</strong>, giving 5 nodes total like the professor's.</p>
+
+  <div class="sdesc" id="sdesc">Step 0 — Drag the slider or hit <strong>Next →</strong> to walk through the tree! 🐾</div>
+
+  <div class="stats" id="stats">
+    <span class="pill bd">Best Bound: —</span>
+    <span class="pill bi">Best Incumbent: —</span>
+    <span class="pill gp">Gap: —</span>
+  </div>
+
+  <!-- SLIDER -->
+  <div class="slider-wrap">
+    <label>Step</label>
+    <input type="range" id="stepslider" min="0" max="5" value="0" step="1" oninput="sliderMove(this.value)">
+    <span class="slider-val" id="sliderval">0 / 5</span>
+  </div>
+
+  <div class="ctrl-row">
+    <button class="btn sec" id="bbk" onclick="go(-1)" disabled>← Back</button>
+    <span class="step-lbl" id="slbl">Step 0 / 5</span>
+    <button class="btn" id="bfwd" onclick="go(1)">Next →</button>
+    <button class="btn sec" onclick="reset()">↺ Reset</button>
+  </div>
+
+  <div class="legend">
+    <span><span class="ldot" style="background:#185FA5"></span>LP relaxation / bound</span>
+    <span><span class="ldot" style="background:#E8593C"></span>Active / exploring</span>
+    <span><span class="ldot" style="background:#0F6E56"></span>Integer incumbent</span>
+    <span><span class="ldot" style="background:#A32D2D"></span>Fathomed</span>
+  </div>
+
+  <div class="tree-wrap">
+    <!-- wider viewBox: 820 wide so Node 4 (right edge ~743) is fully visible -->
+    <svg id="tsvg" width="100%" viewBox="0 0 820 520" role="img">
+      <title>Mitho Pizza Optimizer Branch and Bound Decision Tree</title>
+      <desc>5-node B&B decision tree for pizza topping selection</desc>
+    </svg>
+  </div>
+</div>
+
+<!-- ══ TAB 3: BB CONTINUOUS ══ -->
+<div class="section" id="tab-bb">
+  <h2>🔢 B&amp;B with Continuous Variables (xᵢ ∈ [0, 1])</h2>
+  <p class="section-intro">Instead of forcing xᵢ ∈ {0,1} right away, we first <strong>relax</strong> to xᵢ ∈ [0, 1] — fractions allowed! This LP relaxation gives an optimistic upper bound. We then branch on fractional variables until every xᵢ is integer. Gap closes to zero at optimality.</p>
+
+  <div class="fbox">
+    <div class="fobj">Maximize Z = 8.3x₁ + 5.2x₂ + 4.8x₃ + 4.2x₄ + 3.5x₅ + 4.7x₆ + 7.2x₇ + 4.2x₈ + 3.1x₉ + 5.0x₁₀</div>
+    <div class="fcon">Subject to: 2x₁ + 2x₂ + 0.5x₃ + x₄ + x₅ + 3x₆ + 3x₇ + 2x₈ + 1.5x₉ + 2x₁₀ ≤ 7</div>
+    <div class="fvar">xᵢ ∈ [0, 1] — continuous relaxation (decimal values OK!)</div>
+  </div>
+  <div id="bblist"></div>
+</div>
+
+<footer>Mitho Pizza Optimizer · Branch &amp; Bound · Sanjina 2417503 · 🐾 Snoopy Edition</footer>
+
+<script>
+/* TAB SWITCHING */
+function switchTab(name, btn) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  btn.classList.add('active');
+}
+
+/* STEP DATA */
+const STEPS = [
+  { desc: '<strong>Step 0 — Setup:</strong> 10 toppings, budget 7 ww. Sort by sat/cost ratio. Top: x₃ Nduja (9.60), x₄ Ricotta (4.20), x₁ Salame (4.15), x₅ Zucchini (3.50), x₂ Fried eggplant (2.60)… Ready to solve LP relaxation.',
+    bd:'—', bi:'—', gap:'—', vis:['n0'], active:['n0'], fat:[], opt:[] },
+  { desc: '<strong>Step 1 — Node 0 (LP Relaxation):</strong> Allow xᵢ ∈ [0,1]. Greedy fill: x₃=1 (0.5ww), x₄=1 (1ww), x₁=1 (2ww), x₅=1 (1ww), x₂=1 (2ww) → 6.5ww, Z=26. Remaining 0.5ww → <strong>x₈ = 0.25 (fractional!)</strong>. Z_LP = 27.05. Upper bound set. Branch on x₈.',
+    bd:'27.05', bi:'—', gap:'—', vis:['n0'], active:['n0'], fat:[], opt:[] },
+  { desc: '<strong>Step 2 — Branch on x₈ (Pancetta):</strong> x₈ = 0.25 is fractional. Create Node 1 (force x₈ = 0) and Node 2 (force x₈ = 1). Both branches will be explored.',
+    bd:'27.05', bi:'—', gap:'—', vis:['n0','e01','e02','n1','n2'], active:['n1','n2'], fat:[], opt:[] },
+  { desc: '<strong>Step 3 — Node 2 (x₈ = 1, Pancetta in):</strong> Pancetta uses 2ww → 5ww left. Re-solve LP: x₃=1, x₄=1, x₁=1, x₅=1 (4.5ww) + x₂=0.25 (fractional). Z=26.3. Branch again on x₂ → Nodes 3 and 4.',
+    bd:'27.05', bi:'—', gap:'—', vis:['n0','e01','e02','n1','n2','en23','en24','n3','n4'], active:['n2'], fat:[], opt:[] },
+  { desc: '<strong>Step 4 — Node 3 (x₈=1, x₂=0): Fathomed by bound.</strong> Best Z possible = 22 &lt; current best. <strong>Node 4 (x₈=1, x₂=1): Infeasible!</strong> Cost = 0.5+1+2+1+2+2 = 8.5ww &gt; 7ww. Both children fathomed ✗',
+    bd:'27.05', bi:'—', gap:'—', vis:['n0','e01','e02','n1','n2','en23','en24','n3','n4'], active:[], fat:['n3','n4'], opt:[] },
+  { desc: '<strong>Step 5 — Node 1 (x₈ = 0): Integer solution! 🎉</strong> Without Pancetta: x₃=1, x₄=1, x₁=1, x₅=1, x₂=1 → cost = 6.5ww ≤ 7ww. All integer! Z = 4.8+4.2+8.3+3.5+5.2 = <strong>26</strong>. Best Bound = Best Incumbent = 26. Gap = 0. <strong>OPTIMAL!</strong>',
+    bd:'26', bi:'26', gap:'0 ✓ Optimal', vis:['n0','e01','e02','n1','n2','en23','en24','n3','n4'], active:[], fat:['n3','n4'], opt:['n1'] },
+];
+
+/* NODE GEOMETRY — viewBox is now 820 wide; Node4 right edge = 743+10=753 ✓ */
+const N = {
+  n0: { x:410, y:18,  w:270, h:96, title:'Node 0: LP Relaxation',           lines:['x₁=x₂=x₃=x₄=x₅=1,  x₈=0.25','Z_LP = 27.05  (Upper Bound)'], badge:'Best Bound' },
+  n1: { x:185, y:190, w:250, h:96, title:'Node 1:  x₈ = 0  (Pancetta out)', lines:['x₁=x₂=x₃=x₄=x₅=1, cost=6.5ww','Z = 26  → All integer ✓'],     badge:'Best Incumbent' },
+  n2: { x:595, y:190, w:250, h:96, title:'Node 2:  x₈ = 1  (Pancetta in)',  lines:['x₈=1,  x₂=0.25 fractional','Z_LP = 26.3  → branch on x₂'],   badge:'Fractional' },
+  n3: { x:490, y:375, w:228, h:96, title:'Node 3:  x₈=1, x₂=0',            lines:['Z bound = 22 < incumbent 26','Fathomed by bound'],              badge:'Fathomed' },
+  n4: { x:728, y:375, w:220, h:96, title:'Node 4:  x₈=1, x₂=1',            lines:['Cost = 8.5ww > 7ww budget','Infeasible'],                       badge:'Fathomed' },
+};
+
+const E = {
+  e01:  { x1:340, y1:114, x2:264, y2:190, lbl:'x₈ = 0', lx:280, ly:158 },
+  e02:  { x1:480, y1:114, x2:526, y2:190, lbl:'x₈ = 1', lx:520, ly:158 },
+  en23: { x1:558, y1:286, x2:538, y2:375, lbl:'x₂ = 0', lx:520, ly:333 },
+  en24: { x1:660, y1:286, x2:690, y2:375, lbl:'x₂ = 1', lx:692, ly:333 },
+};
+
+let step = 0;
+
+function nodeColor(id, s) {
+  if (s.opt.includes(id))    return { fill:'#E1F5EE', stroke:'#0F6E56', tc:'#085041' };
+  if (s.fat.includes(id))    return { fill:'#FCEBEB', stroke:'#A32D2D', tc:'#791F1F' };
+  if (s.active.includes(id)) return { fill:'#FFF0EB', stroke:'#E8593C', tc:'#993C1D' };
+  if (id === 'n0')           return { fill:'#E6F1FB', stroke:'#185FA5', tc:'#042C53' };
+  return { fill:'#f7f3ed', stroke:'#c8baa0', tc:'#5c4a2a' };
+}
+
+function draw() {
+  const s = STEPS[step];
+  const vis = new Set(s.vis);
+  let h = `<defs><marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>`;
+
+  for (const [id, e] of Object.entries(E)) {
+    if (!vis.has(id)) continue;
+    h += `<line x1="${e.x1}" y1="${e.y1}" x2="${e.x2}" y2="${e.y2}" stroke="#c8baa0" stroke-width="1.5" marker-end="url(#ar)"/>`;
+    h += `<text x="${e.lx}" y="${e.ly}" text-anchor="middle" font-family="'Nunito',sans-serif" font-size="13" font-weight="700" fill="#E8593C">${e.lbl}</text>`;
+  }
+
+  for (const [id, n] of Object.entries(N)) {
+    if (!vis.has(id)) continue;
+    const c = nodeColor(id, s);
+    const rx = n.x - n.w / 2;
+    h += `<rect x="${rx}" y="${n.y}" width="${n.w}" height="${n.h}" rx="12" fill="${c.fill}" stroke="${c.stroke}" stroke-width="1.5"/>`;
+    h += `<text x="${n.x}" y="${n.y+22}" text-anchor="middle" font-family="'Nunito',sans-serif" font-size="13.5" font-weight="800" fill="${c.tc}">${n.title}</text>`;
+    n.lines.forEach((ln, i) => {
+      h += `<text x="${n.x}" y="${n.y+40+i*17}" text-anchor="middle" font-family="'Courier New',monospace" font-size="11" fill="${c.tc}" opacity=".9">${ln}</text>`;
+    });
+    const isFat = s.fat.includes(id), isOpt = s.opt.includes(id);
+    let bc = '#c8baa0', bfill = '#f0ebe1';
+    if (n.badge === 'Best Bound')                { bc = '#185FA5'; bfill = '#E6F1FB'; }
+    if (n.badge === 'Best Incumbent' || isOpt)   { bc = '#0F6E56'; bfill = '#E1F5EE'; }
+    if (isFat)                                    { bc = '#A32D2D'; bfill = '#FCEBEB'; }
+    const btext = isFat ? 'Fathomed ✗' : isOpt ? 'Optimal ★' : n.badge;
+    h += `<rect x="${rx+5}" y="${n.y+n.h-23}" width="${n.w-10}" height="19" rx="6" fill="${bfill}" stroke="${bc}" stroke-width=".8"/>`;
+    h += `<text x="${n.x}" y="${n.y+n.h-11}" text-anchor="middle" font-family="'Nunito',sans-serif" font-size="10.5" font-weight="700" fill="${bc}">${btext}</text>`;
+  }
+
+  document.getElementById('tsvg').innerHTML = h;
+  document.getElementById('sdesc').innerHTML = s.desc;
+  document.getElementById('stats').innerHTML =
+    `<span class="pill bd">Best Bound: ${s.bd}</span><span class="pill bi">Best Incumbent: ${s.bi}</span><span class="pill gp">Gap: ${s.gap}</span>`;
+  document.getElementById('slbl').textContent = `Step ${step} / ${STEPS.length-1}`;
+  document.getElementById('stepslider').value = step;
+  document.getElementById('sliderval').textContent = `${step} / ${STEPS.length-1}`;
+  document.getElementById('bbk').disabled  = step === 0;
+  document.getElementById('bfwd').disabled = step === STEPS.length-1;
+}
+
+function go(d)          { step = Math.max(0, Math.min(STEPS.length-1, step+d)); draw(); }
+function reset()        { step = 0; draw(); }
+function sliderMove(v)  { step = parseInt(v); draw(); }
+draw();
+
+/* BB CONTINUOUS CARDS */
+const CARDS = [
+  { cls:'hl',  title:'Step 1 — Sort toppings by sat/cost ratio',
+    body:'Rank all 10 toppings: x₃ Nduja <code>9.60</code>, x₄ Ricotta <code>4.20</code>, x₁ Salame <code>4.15</code>, x₅ Zucchini <code>3.50</code>, x₂ Fried eggplant <code>2.60</code>, x₇ Parma ham <code>2.40</code>, x₁₀ Buffalo mozzarella <code>2.50</code>, x₈ Pancetta <code>2.10</code>, x₉ Gorgonzola <code>2.07</code>, x₆ Burrata <code>1.57</code>.' },
+  { cls:'hl',  title:'Step 2 — Node 0: LP Relaxation (xᵢ ∈ [0, 1])',
+    body:'Greedy fill: x₃=1.0 (0.5ww), x₄=1.0 (1ww), x₁=1.0 (2ww), x₅=1.0 (1ww), x₂=1.0 (2ww) → 6.5ww, Z=26.0. Remaining 0.5ww → <code>x₈ = 0.25</code> (0.25 × 4.2 = 1.05). <strong>Z_LP = 27.05</strong>. This is our upper bound. x₈ fractional → must branch.' },
+  { cls:'',    title:'Step 3 — Branch: x₈ = 0 (Node 1)  vs  x₈ = 1 (Node 2)',
+    body:'Two child sub-problems. <strong>Node 1:</strong> Pancetta excluded (x₈ = 0). <strong>Node 2:</strong> Pancetta included (x₈ = 1). Both explored. Upper bound stays 27.05 until an integer feasible solution is found.' },
+  { cls:'opt', title:'Step 4 — Node 1 (x₈ = 0): Integer solution found! 🎉',
+    body:'Without Pancetta, re-solve: x₃=1, x₄=1, x₁=1, x₅=1, x₂=1 → cost = 0.5+1+2+1+2 = <code>6.5ww ≤ 7ww</code>. All variables 0 or 1 — no fractions! <strong>Z = 4.8+4.2+8.3+3.5+5.2 = 26</strong>. New incumbent = 26.' },
+  { cls:'fat', title:'Step 5 — Node 2 (x₈ = 1): Both sub-branches fathomed',
+    body:'Pancetta in (2ww), 5ww left → x₂=0.25 fractional again. Branch on x₂:<br><br><strong>Node 3 (x₂=0, x₈=1):</strong> Best Z = 22 &lt; 26 → <strong>fathomed by bound</strong>.<br><strong>Node 4 (x₂=1, x₈=1):</strong> Cost = 8.5ww &gt; 7ww → <strong>infeasible, fathomed</strong>.' },
+  { cls:'opt', title:'Step 6 — Optimality confirmed: Z* = 26, Gap = 0',
+    body:'All nodes explored or fathomed. Best Bound = Best Incumbent = <strong>26</strong>. Gap = 0.<br><br><strong>Optimal:</strong> x₁=x₂=x₃=x₄=x₅=1, rest=0. Toppings: Salame + Fried eggplant + Nduja + Ricotta + Zucchini. Cost = <code>6.5ww</code>. Z* = <code>26</code>. 🐾' },
+];
+
+const bl = document.getElementById('bblist');
+CARDS.forEach((c, i) => {
+  const d = document.createElement('div');
+  d.className = 'bbcard ' + (c.cls||'');
+  const tc = c.cls==='fat' ? 'var(--crimson)' : c.cls==='opt' ? 'var(--green)' : 'var(--text)';
+  d.innerHTML = `<div class="bbcard-title" style="color:${tc}">${i+1}. ${c.title}</div><div class="bbcard-body">${c.body}</div>`;
+  bl.appendChild(d);
+});
+</script>
+</body>
+</html>
